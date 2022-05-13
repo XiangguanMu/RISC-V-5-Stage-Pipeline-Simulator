@@ -495,7 +495,7 @@ int main()
                     if(state.EX.Imm[11]){
                         addressExtend = bitset<32>(string(20,'1') + s);//立即数
                         addressExtend.flip();
-                        state.IF.PC = bitset<32>(addressExtend.to_ulong()+1+state.IF.PC.to_ulong());//如果是负数
+                        state.IF.PC = bitset<32>(state.IF.PC.to_ulong()-(addressExtend.to_ulong()+1));//如果是负数
                     }
                     else{
                         state.IF.PC = bitset<32>(addressExtend.to_ulong()+state.IF.PC.to_ulong());
