@@ -272,10 +272,10 @@ int main()
     state.WB.nop = true;
     state.EX.alu_op = true;
     int cycle = 0;
-    int lw_flag=0;  // 是否有load-use冒险，若有，则PC保持；若无，则PC+4
+    int lu_flag=0;  // 是否有load-use冒险，若有，则PC保持；若无，则PC+4
              
     while (1) {
-//        int lw_flag=0;
+//        int lu_flag=0;
 //        int flag=0;
 
         /* --------------------- WB stage --------------------- */
@@ -411,6 +411,11 @@ int main()
                 if(state.ID.Instr.to_string().substr(0, 7) == string("0100000"))
                     state.EX.alu_op= false;
             }
+            // branch
+            if(state.ID.Instr.to_string().substr(25,7) == "1100011")
+            {
+                state.EX.Imm=bitset<64>(state.ID.Instr.to_string().substr(0,1)+state.ID.Instr.to_string().substr(24,1)+state.ID.Instr.to_string().substr(1,6)+state.ID.Instr.to_string().substr(20,4));
+            }
 
 
             //处理raw hazard，不包括load-use 冒险
@@ -468,7 +473,7 @@ int main()
                     if(state.EX.Wrt_reg_addr.to_string()!="00000")
                     // x0不可能被写，只能是初始化值还未修改
                     {
-                        lw_flag=1;
+                        lu_flag=1;
                         cout<<"load-use hazard cycle:"<<cycle<<" reg:"<<state.EX.Wrt_reg_addr<<endl;
                         state.ID.nop = true;//flush
                     }
@@ -487,15 +492,18 @@ int main()
 //            }
 
             // branch
-            // in test2 I change here
             if(state.ID.Instr.to_string().substr(25,7) == "1100011"){
+                cout<<"branch: "<<state.EX.Rs<<' '<<state.EX.Rt<<' '<<endl;
                 if(state.EX.Read_data1 != state.EX.Read_data2){//不相等需要跳转
+                    cout<<"imm: "<<state.EX.Imm<<' '<<endl;
                     string s = state.ID.Instr.to_string();
                     bitset<32> addressExtend;
                     addressExtend = bitset<32>(s.substr(0,1)+s.substr(25,1)+s.substr(1,6)+s.substr(20,4));
+                    cout<<"addressExtend: "<<addressExtend<<' '<<endl;
                     if(state.EX.Imm[11]){
-                        addressExtend = bitset<32>(string(20,'1') + s);//立即数
+                        addressExtend = bitset<32>(string(20,'1') + addressExtend.to_string().substr(20,12));//立即数
                         addressExtend.flip();
+                        cout<<"addressExtend-after: "<<addressExtend<<' '<<endl;
                         state.IF.PC = bitset<32>(state.IF.PC.to_ulong()-(addressExtend.to_ulong()+1));//如果是负数
                     }
                     else{
@@ -516,11 +524,11 @@ int main()
             // 取指
             state.ID.Instr=myInsMem.readInstr(state.IF.PC);
             // 更新PC
-            if(!lw_flag)
+            if(!lu_flag)
                 state.IF.PC = bitset<32>(state.IF.PC.to_ulong() + 4);
             else
             {
-                lw_flag=0;
+                lu_flag=0;
             }
             //判断是否需要终止
             if(state.ID.Instr.to_string()=="11111111111111111111111111111111")
