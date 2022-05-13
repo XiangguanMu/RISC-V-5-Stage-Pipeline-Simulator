@@ -498,7 +498,7 @@ int main()
                     cout<<"imm: "<<state.EX.Imm<<' '<<endl;
                     string s = state.ID.Instr.to_string();
                     bitset<32> addressExtend;
-                    addressExtend = bitset<32>(s.substr(0,1)+s.substr(25,1)+s.substr(1,6)+s.substr(20,4));
+                    addressExtend = bitset<32>(s.substr(0,1)+s.substr(24,1)+s.substr(1,6)+s.substr(20,4));
                     cout<<"addressExtend: "<<addressExtend<<' '<<endl;
                     if(state.EX.Imm[11]){
                         addressExtend = bitset<32>(string(20,'1') + addressExtend.to_string().substr(20,12));//立即数
