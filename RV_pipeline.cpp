@@ -488,6 +488,7 @@ int main()
 
             // branch
             if(state.ID.Instr.to_string().substr(25,7) == "1100011"){
+                // 不相等，需要跳转
                 if(state.EX.Read_data1 != state.EX.Read_data2){
                     string s = state.ID.Instr.to_string();
                     bitset<32> addressExtend;
@@ -495,7 +496,7 @@ int main()
                     if(state.EX.Imm[11]){
                         addressExtend = bitset<32>(string(20,'1') + s);//立即数
                     }
-
+                    state.EX.nop= true;
                     state.IF.PC = bitset<32>(addressExtend.to_ulong()+state.IF.PC.to_ulong());
                 }
 
