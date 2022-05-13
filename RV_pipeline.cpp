@@ -488,18 +488,20 @@ int main()
 
             // branch
             if(state.ID.Instr.to_string().substr(25,7) == "1100011"){
-                // 不相等，需要跳转
-                if(state.EX.Read_data1 != state.EX.Read_data2){
+                if(state.EX.Read_data1 != state.EX.Read_data2){//不相等需要跳转
                     string s = state.ID.Instr.to_string();
                     bitset<32> addressExtend;
                     addressExtend = bitset<32>(s.substr(0,1)+s.substr(25,1)+s.substr(1,6)+s.substr(20,4));
                     if(state.EX.Imm[11]){
                         addressExtend = bitset<32>(string(20,'1') + s);//立即数
+                        addressExtend.flip();
+                        state.IF.PC = bitset<32>(addressExtend.to_ulong()+1+state.IF.PC.to_ulong());//如果是负数
                     }
-                    state.EX.nop= true;
-                    state.IF.PC = bitset<32>(addressExtend.to_ulong()+state.IF.PC.to_ulong());
+                    else{
+                        state.IF.PC = bitset<32>(addressExtend.to_ulong()+state.IF.PC.to_ulong());
+                    }
+                    state.EX.nop = true;
                 }
-
             }
 
         }
