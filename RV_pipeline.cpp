@@ -487,6 +487,7 @@ int main()
 //            }
 
             // branch
+            // in test2 I change here
             if(state.ID.Instr.to_string().substr(25,7) == "1100011"){
                 if(state.EX.Read_data1 != state.EX.Read_data2){//不相等需要跳转
                     string s = state.ID.Instr.to_string();
