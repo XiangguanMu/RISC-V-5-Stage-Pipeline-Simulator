@@ -1,4 +1,15 @@
 B[1]=A[i-j]
+ld x29 0(x0)
+ld x28 8(x0)
+ld x10 16(x0)
+ld x12 24(x0)
+sub x30, x28, x29 // compute i-j 
+add x30, x30, x30 // multiply by 8 to convert the double word offset to a byte offset 
+add x30, x30, x30 
+add x30, x30, x30 
+add x10, x10, x30 
+ld x30, 0 (x10) // load A[i-j] 
+sd x30, 8 (x12)
 00000000
 00000000
 00111110
@@ -100,7 +111,7 @@ add x29,x29,x29
 00110011
 11111111
 11011110
-00000100
+00000000
 11100011
 00000001
 11011110

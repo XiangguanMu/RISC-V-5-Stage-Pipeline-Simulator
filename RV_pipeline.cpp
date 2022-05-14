@@ -111,7 +111,7 @@ class INSMem
             ifstream imem;
 			string line;
 			int i=0;
-			imem.open("imem.txt");
+			imem.open("imem-load-useHazard.txt");
 			if (imem.is_open())
 			{
 				while (getline(imem,line))
@@ -149,7 +149,7 @@ class DataMem
             ifstream dmem;
             string line;
             int i=0;
-            dmem.open("dmem.txt");
+            dmem.open("dmem-load-use&controll.txt");
             if (dmem.is_open())
             {
                 while (getline(dmem,line))
@@ -461,7 +461,7 @@ int main()
 
                 }
                 if(state.EX.Rs == state.WB.Wrt_reg_addr&&flag==0){
-                    if(state.MEM.Wrt_reg_addr.to_string()!="00000"){
+                    if(state.WB.Wrt_reg_addr.to_string()!="00000"){
                         state.EX.Read_data1 = state.WB.Wrt_data;
                         cout<<"RAW32 hazard cycle:"<<cycle<<" reg:"<<state.MEM.Wrt_reg_addr<<endl;
                     }
@@ -479,17 +479,6 @@ int main()
                     }
                 }
             }
-            //如果是load-use数据冒险
-//            else{
-//                if(state.EX.Rs == state.MEM.Wrt_reg_addr || state.EX.Rt == state.MEM.Wrt_reg_addr){
-//                    if(state.MEM.Wrt_reg_addr.to_string()!="00000")
-//                    // x0不可能被写，只能是初始化值还未修改
-//                    {
-//                        cout<<"load-use hazard cycle:"<<cycle<<endl;
-//                        state.EX.nop = true;//flush
-//                    }
-//                }
-//            }
 
             // branch
             if(state.ID.Instr.to_string().substr(25,7) == "1100011"){
@@ -514,18 +503,32 @@ int main()
             }
 
         }
-        state.ID.nop = state.IF.nop;
+        // nop，清空所有控制信号
+        else
+        {
+            state.EX.is_I_type= false;
+            state.EX.rd_mem= false;
+            state.EX.wrt_mem= false;
+            state.EX.alu_op= false;
+            state.EX.wrt_enable= false;
+
+        }
+        if(!lu_flag)
+            state.ID.nop = state.IF.nop;
 
 
 
         /* --------------------- IF stage --------------------- */
         if(!state.IF.nop)
         {
-            // 取指
-            state.ID.Instr=myInsMem.readInstr(state.IF.PC);
+
             // 更新PC
             if(!lu_flag)
+            {
+                // 取指
+                state.ID.Instr=myInsMem.readInstr(state.IF.PC);
                 state.IF.PC = bitset<32>(state.IF.PC.to_ulong() + 4);
+            }
             else
             {
                 lu_flag=0;
